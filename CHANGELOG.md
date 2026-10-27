@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.7 (build 7)
+
+- New panel art with the knob labelled NOISE (Niels). Version bumped so MOD loads the new face.
+
 ## 1.0.6 (build 6): Noise
 
 After a good stretch of playing: the fine rasp on held notes on the Walkman, 8-track and 4-track wasn't always wanted.
@@ -8,7 +12,6 @@ After a good stretch of playing: the fine rasp on held notes on the Walkman, 8-t
 - **Pocket and Answering unchanged**: their grain stays at every Noise setting. Dropouts still belong to Age.
 - Measured on a held low E: at Noise 0 the Walkman, 8-track and 4-track drop from about −42 to −44 dB of grit (re the note) to the measurement floor (−48 to −49 dB). Saturation, self-erasure and the compander were measured too and add nothing audible at guitar level.
 - The archetype presets are set to Noise 1, so they sound exactly as before; Always on stays at 0.
-- The face's knob label needs to read NOISE (new panel art).
 
 ## 1.0.5 (build 5): the LCD font, working
 

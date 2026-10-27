@@ -215,7 +215,7 @@ protected:
     const char* getDescription() const override { return "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."; }
     const char* getMaker()       const override { return DISTRHO_PLUGIN_BRAND; }
     const char* getLicense()     const override { return "GPL-3.0-or-later"; }
-    uint32_t    getVersion()     const override { return d_version(1, 0, 6); }   // = lv2:minorVersion 2, microVersion 6
+    uint32_t    getVersion()     const override { return d_version(1, 0, 7); }   // = lv2:minorVersion 2, microVersion 7
     int64_t     getUniqueId()    const override { return d_cconst('n', 'T', 'p', 's'); }
 
     void initParameter(uint32_t index, Parameter& p) override
