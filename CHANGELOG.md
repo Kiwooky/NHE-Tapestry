@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.0.6 (build 6): Noise
+
+After a good stretch of playing: the fine rasp on held notes on the Walkman, 8-track and 4-track wasn't always wanted.
+
+- **Hiss is now Noise**, and it owns the tape's grain (modulation noise) too. 0 = clean, no hiss, no grain. 1 = the format's grain, exactly as 1.0.5, still no hiss. 2 to 10 = the hiss fades in, 3 dB a step, to the format's real noise floor at 10 (where 1.0.5 had it at 5). The port symbol is still `hiss`, so saved presets and pedalboards load.
+- **Pocket and Answering unchanged**: their grain stays at every Noise setting. Dropouts still belong to Age.
+- Measured on a held low E: at Noise 0 the Walkman, 8-track and 4-track drop from about −42 to −44 dB of grit (re the note) to the measurement floor (−48 to −49 dB). Saturation, self-erasure and the compander were measured too and add nothing audible at guitar level.
+- The archetype presets are set to Noise 1, so they sound exactly as before; Always on stays at 0.
+- The face's knob label needs to read NOISE (new panel art).
+
 ## 1.0.5 (build 5): the LCD font, working
 
 - Found why web fonts never showed in mod-ui: its main.css sets `* { font-family: "cooper hewitt", Sans-serif !important }` on every element. The face's LCD rule now carries `!important` too, and its class selector wins. Reproduced with mod-ui's own main.css: without it the LCD falls back to mod-ui's font; with it the LCD font is used.

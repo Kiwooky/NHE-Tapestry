@@ -12,7 +12,7 @@
 //   in -> [ALC] -> Drive -> record pre-emphasis -> treble self-erasure (the highs
 //      compress first, like oxide does) -> saturation (2x oversampled)
 //      -> de-emphasis -> /Drive (mostly compensated: Drive keeps a quarter of its gain)
-//      -> grain (modulation noise)
+//      -> grain (modulation noise: set by Noise, except on Pocket and Answering)
 //      -> tape path: wow + flutter move the read point around a 6 ms centre
 //      -> + hiss -> dropouts -> playback EQ (low cut, head bump, gap loss, band)
 //      -> [4-track only: 2:1 dbx-style encode before the tape, 1:2 decode here]
@@ -215,7 +215,7 @@ protected:
     const char* getDescription() const override { return "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."; }
     const char* getMaker()       const override { return DISTRHO_PLUGIN_BRAND; }
     const char* getLicense()     const override { return "GPL-3.0-or-later"; }
-    uint32_t    getVersion()     const override { return d_version(1, 0, 5); }   // = lv2:minorVersion 2, microVersion 5
+    uint32_t    getVersion()     const override { return d_version(1, 0, 6); }   // = lv2:minorVersion 2, microVersion 6
     int64_t     getUniqueId()    const override { return d_cconst('n', 'T', 'p', 's'); }
 
     void initParameter(uint32_t index, Parameter& p) override
@@ -263,7 +263,7 @@ protected:
             p.ranges.min = 0.0f; p.ranges.max = 10.0f; p.ranges.def = 3.0f;
             break;
         case kHiss:
-            p.name = "Hiss"; p.symbol = "hiss";
+            p.name = "Noise"; p.symbol = "hiss";   // symbol kept from 1.0.x so saved presets still load
             p.ranges.min = 0.0f; p.ranges.max = 10.0f; p.ranges.def = 0.0f;
             break;
         case kMix:
@@ -535,9 +535,13 @@ private:
         const FormatDef& F = kFormats[fFmt];
         const TapeDef& T = kTapes[fTape];
         fG0 = F.g0 * T.sens;
-        fHissAmp = hissK <= 0.0f ? 0.0f
-            : kRef * dbToLin(F.hissCalDb - (F.snDb + T.hissOffDb) + 2.0f * (hissK - 5.0f)) * std::fmin(hissK, 1.0f) * 1.7320508f;
-        fGrainAmt = F.grain * T.grainMul * (1.0f + 0.1f * age) * fGrainNorm;
+        // Noise: 0 = no hiss, no grain. 1 = the format's grain, no hiss. From 2 the hiss fades in,
+        // rising 3 dB a step to the format's real noise floor at 10.
+        // Pocket and Answering keep their grain at every setting: their grit is the machine
+        fHissAmp = hissK <= 2.0f ? 0.0f
+            : kRef * dbToLin(F.hissCalDb - (F.snDb + T.hissOffDb) - 3.0f * (10.0f - hissK)) * std::fmin(hissK - 2.0f, 1.0f) * 1.7320508f;
+        const float grainK = (fFmt == kPocket || fFmt == kAnswer) ? 1.0f : std::fmin(hissK, 1.0f);
+        fGrainAmt = F.grain * T.grainMul * (1.0f + 0.1f * age) * fGrainNorm * grainK;
         fAlcOn = F.alcMaxDb > 0.0f;
         fAlcMax = fAlcOn ? dbToLin(F.alcMaxDb) : 1.0f;
         fMakeup = dbToLin(F.makeupDb);

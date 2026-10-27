@@ -42,7 +42,7 @@ Drive is mostly compensated: it keeps a quarter of its gain (−3 dB at −12, +
 | Wow | 0 … 200 % | 100 % | Scales the format's slow pitch drift (< 4 Hz) |
 | Flutter | 0 … 200 % | 100 % | Scales the format's fast pitch movement (≥ 4 Hz) |
 | Age | 0 … 10 | 3 | Wear: stretched belt (more wow), head wear (duller), dropouts, more grain |
-| Hiss | 0 … 10 | 0 | 0 = off, 5 = the format's real noise floor, 10 = +10 dB |
+| Noise (symbol `hiss`) | 0 … 10 | 0 | 0 = no hiss, no grain. 1 = the format's grain, no hiss. 2 to 10 = hiss fades in, 3 dB a step, to the format's real noise floor at 10. Pocket and Answering keep their grain at every setting |
 | Mix | 0 … 100 % | 100 % | Dry/tape blend |
 | Level | −12 … +12 dB | 0 dB | Output level (tape and dry), for unity or a push into the amp |
 | Bypass | | | In-plugin, 10 ms crossfade, dry at unity |
@@ -93,7 +93,7 @@ On reels, Ferric is "standard studio tape"; Chrome and Metal on reels are the ex
 | Answering machine | Answering | Cheap | 0 | 120 | 100 | 6 |
 | VHS linear | VHS | Ferric | 0 | 100 | 100 | 3 |
 
-Hiss is 0, Tone 0 and Level 0 in every preset (dial them in).
+Noise is 1 in the archetype presets (their grain, no hiss) and 0 in Always on; Tone and Level are 0 in every preset.
 
 ## Sources
 
@@ -114,7 +114,7 @@ Hiss is 0, Tone 0 and Level 0 in every preset (dial them in).
 | Loudness, every Format x Tape at defaults | within 1.3 dB of bypass (RMS, guitar level) |
 | Factory presets | all within 1.9 dB of bypass (Bedroom 4-track +1.9, Always on +1.5) |
 | Wow & flutter, 1 kHz tone, Age 0 (cents rms) | Master 0.2, Studio 0.5, Home 1.3, 4-track 1.5, Walkman 2.2, VHS 3.0, 8-track 3.4, Pocket 3.9, Answering 4.9 (0.1 % ≈ 1.7 cents) |
-| 4-track hiss at Hiss 5 | −111 dBFS in silence, −67 dBFS under a −23 dBFS tone |
+| 4-track hiss at Noise 10 | −111 dBFS in silence, −67 dBFS under a −23 dBFS tone |
 | 4-track attacks vs studio reel | up to +1.9 dB (compander punch) |
 | 8-track response | +0.8 dB at 60 Hz, −10.9 dB at 10 kHz |
 | Self-erasure, Walkman, −10 dBFS vs −40 dBFS sine | 6 kHz compresses 7.8 dB, 200 Hz 1.4 dB |
@@ -125,5 +125,5 @@ Hiss is 0, Tone 0 and Level 0 in every preset (dial them in).
 | THD, 200 Hz at −16 dBFS, Studio | −44 dB at Drive 0, −14 dB at +18 |
 | Aliasing, 4 kHz at Drive +18 | nothing above −79 dB below 3 kHz |
 | ALC, quiet player (−34 dBFS peaks) | Pocket lifts it 12 dB more than Walkman |
-| Hiss 5 | lands on each format's floor (Walkman −72 dBFS) |
+| Noise 10 | lands on each format's floor (Walkman −72 dBFS) |
 | CPU, Duo build under qemu | about 1.1× Ouraverb in every format (4-track 1.09×, 8-track 1.13×). Only the Duo's meter gives the real number |

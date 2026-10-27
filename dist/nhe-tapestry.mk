@@ -66,7 +66,7 @@ define NHE_TAPESTRY_SRC3
 //   in -> [ALC] -> Drive -> record pre-emphasis -> treble self-erasure (the highs
 //      compress first, like oxide does) -> saturation (2x oversampled)
 //      -> de-emphasis -> /Drive (mostly compensated: Drive keeps a quarter of its gain)
-//      -> grain (modulation noise)
+//      -> grain (modulation noise: set by Noise, except on Pocket and Answering)
 //      -> tape path: wow + flutter move the read point around a 6 ms centre
 //      -> + hiss -> dropouts -> playback EQ (low cut, head bump, gap loss, band)
 //      -> [4-track only: 2:1 dbx-style encode before the tape, 1:2 decode here]
@@ -269,7 +269,7 @@ protected:
     const char* getDescription() const override { return "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."; }
     const char* getMaker()       const override { return DISTRHO_PLUGIN_BRAND; }
     const char* getLicense()     const override { return "GPL-3.0-or-later"; }
-    uint32_t    getVersion()     const override { return d_version(1, 0, 5); }   // = lv2:minorVersion 2, microVersion 5
+    uint32_t    getVersion()     const override { return d_version(1, 0, 6); }   // = lv2:minorVersion 2, microVersion 6
     int64_t     getUniqueId()    const override { return d_cconst('n', 'T', 'p', 's'); }
 
     void initParameter(uint32_t index, Parameter& p) override
@@ -317,7 +317,7 @@ protected:
             p.ranges.min = 0.0f; p.ranges.max = 10.0f; p.ranges.def = 3.0f;
             break;
         case kHiss:
-            p.name = "Hiss"; p.symbol = "hiss";
+            p.name = "Noise"; p.symbol = "hiss";   // symbol kept from 1.0.x so saved presets still load
             p.ranges.min = 0.0f; p.ranges.max = 10.0f; p.ranges.def = 0.0f;
             break;
         case kMix:
@@ -589,9 +589,13 @@ private:
         const FormatDef& F = kFormats[fFmt];
         const TapeDef& T = kTapes[fTape];
         fG0 = F.g0 * T.sens;
-        fHissAmp = hissK <= 0.0f ? 0.0f
-            : kRef * dbToLin(F.hissCalDb - (F.snDb + T.hissOffDb) + 2.0f * (hissK - 5.0f)) * std::fmin(hissK, 1.0f) * 1.7320508f;
-        fGrainAmt = F.grain * T.grainMul * (1.0f + 0.1f * age) * fGrainNorm;
+        // Noise: 0 = no hiss, no grain. 1 = the format's grain, no hiss. From 2 the hiss fades in,
+        // rising 3 dB a step to the format's real noise floor at 10.
+        // Pocket and Answering keep their grain at every setting: their grit is the machine
+        fHissAmp = hissK <= 2.0f ? 0.0f
+            : kRef * dbToLin(F.hissCalDb - (F.snDb + T.hissOffDb) - 3.0f * (10.0f - hissK)) * std::fmin(hissK - 2.0f, 1.0f) * 1.7320508f;
+        const float grainK = (fFmt == kPocket || fFmt == kAnswer) ? 1.0f : std::fmin(hissK, 1.0f);
+        fGrainAmt = F.grain * T.grainMul * (1.0f + 0.1f * age) * fGrainNorm * grainK;
         fAlcOn = F.alcMaxDb > 0.0f;
         fAlcMax = fAlcOn ? dbToLin(F.alcMaxDb) : 1.0f;
         fMakeup = dbToLin(F.makeupDb);
@@ -837,7 +841,7 @@ define NHE_TAPESTRY_FILE5
         [ lv2:index 4 ; lv2:symbol "wow" ;     lv2:name "Wow" ; ],
         [ lv2:index 5 ; lv2:symbol "flutter" ; lv2:name "Flutter" ; ],
         [ lv2:index 6 ; lv2:symbol "age" ;     lv2:name "Age" ; ],
-        [ lv2:index 7 ; lv2:symbol "hiss" ;    lv2:name "Hiss" ; ],
+        [ lv2:index 7 ; lv2:symbol "hiss" ;    lv2:name "Noise" ; ],
         [ lv2:index 8 ; lv2:symbol "mix" ;     lv2:name "Mix" ; ],
         [ lv2:index 9 ; lv2:symbol "level" ;   lv2:name "Level" ; ] ;
     ] .
@@ -858,7 +862,7 @@ define NHE_TAPESTRY_FILE6
     doap:maintainer [ foaf:name "New Horizon" ] ;
     rdfs:comment "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end." ;
     lv2:minorVersion 2 ;
-    lv2:microVersion 5 ;
+    lv2:microVersion 6 ;
     lv2:optionalFeature lv2:hardRTCapable ;
     lv2:requiredFeature <http://lv2plug.in/ns/ext/options#options> ,
                         <http://lv2plug.in/ns/ext/urid#map> ;
@@ -953,7 +957,7 @@ define NHE_TAPESTRY_FILE6
         a lv2:InputPort , lv2:ControlPort ;
         lv2:index 9 ;
         lv2:symbol "hiss" ;
-        lv2:name "Hiss" ;
+        lv2:name "Noise" ;
         lv2:default 0 ;
         lv2:minimum 0 ;
         lv2:maximum 10
@@ -1021,7 +1025,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 110.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1037,7 +1041,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1053,7 +1057,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 1.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1069,7 +1073,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1085,7 +1089,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 4.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1101,7 +1105,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 120.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 6.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1117,7 +1121,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1133,7 +1137,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
@@ -1149,7 +1153,7 @@ define NHE_TAPESTRY_FILE7
         [ lv2:symbol "wow" ; pset:value 100.0 ] ,
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
-        [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
+        [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
         [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 endef
@@ -2382,7 +2386,7 @@ define NHE_TAPESTRY_FILE11
     <div class="tp-knob tp-wow"     title="Wow"     mod-role="input-control-port" mod-port-symbol="wow"></div>
     <div class="tp-knob tp-flutter" title="Flutter" mod-role="input-control-port" mod-port-symbol="flutter"></div>
     <div class="tp-knob tp-age"     title="Age: new .. old" mod-role="input-control-port" mod-port-symbol="age"></div>
-    <div class="tp-knob tp-hiss"    title="Hiss: off .. 10" mod-role="input-control-port" mod-port-symbol="hiss"></div>
+    <div class="tp-knob tp-hiss"    title="Noise: off .. 10 (hiss and grain)" mod-role="input-control-port" mod-port-symbol="hiss"></div>
     <div class="tp-knob tp-tone"    title="Tone: dark .. bright" mod-role="input-control-port" mod-port-symbol="tone"></div>
 
     <!-- the machine's picture follows Format -->

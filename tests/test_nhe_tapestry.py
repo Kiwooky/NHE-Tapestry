@@ -155,23 +155,26 @@ lw = rms(p.run(q, sr, format=WALKMAN)[:, 0][sr:]); lp = rms(p.run(q, sr, format=
 lq = rms(q[sr:])
 check('ALC: pocket lifts a quiet player', db(lp / lq) > db(lw / lq) + 6, 'walkman %+.1f, pocket %+.1f dB' % (db(lw / lq), db(lp / lq)))
 
-# Hiss: off by default (silence in, silence out), the format's floor at 5, louder at 10
+# Noise (port symbol hiss): off by default (silence in, silence out); no hiss up to 2, then it fades in
+# 3 dB a step to the format's real floor at 10
 z = np.zeros(2 * sr)
 check('silence in, silence out (Hiss 0)', all(np.abs(p.run(z, sr, format=f, age=10)).max() < 1e-6 for f in range(NF)))
-h5 = db(rms(p.run(z, sr, hiss=5)[:, 0][sr // 2:]))
+h2 = np.abs(p.run(z, sr, hiss=2)[:, 0]).max()
+h6 = db(rms(p.run(z, sr, hiss=6)[:, 0][sr // 2:]))
 h10 = db(rms(p.run(z, sr, hiss=10)[:, 0][sr // 2:]))
-hs = db(rms(p.run(z, sr, hiss=5, format=STUDIO)[:, 0][sr // 2:]))
-check('hiss 5 near the walkman floor (-72 dBFS +-6)', -78 < h5 < -66, '%.1f dBFS' % h5)
-check('hiss 10 is 10 dB up', 8 < h10 - h5 < 12, '%+.1f dB' % (h10 - h5))
-check('studio hiss far below walkman', hs < h5 - 12, '%.1f dBFS' % hs)
+hs = db(rms(p.run(z, sr, hiss=10, format=STUDIO)[:, 0][sr // 2:]))
+check('noise 2: still no hiss', h2 < 1e-6, 'peak %.2g' % h2)
+check('noise 10 on the walkman floor (-72 dBFS +-6)', -78 < h10 < -66, '%.1f dBFS' % h10)
+check('noise 6 is 12 dB under 10', 10 < h10 - h6 < 14, '%+.1f dB' % (h10 - h6))
+check('studio hiss far below walkman', hs < h10 - 12, '%.1f dBFS' % hs)
 
 # 4-track noise reduction: hiss hides in silence and breathes in under the playing
 from scipy.signal import butter, sosfilt
 hpf = butter(4, 5000, 'highpass', fs=sr, output='sos')
-hq = db(rms(p.run(z, sr, format=FOUR, hiss=5)[:, 0][sr // 2:]))
+hq = db(rms(p.run(z, sr, format=FOUR, hiss=10)[:, 0][sr // 2:]))
 xt = 0.1 * np.sin(2 * np.pi * 200 * np.arange(3 * sr) / sr) * np.minimum(1, np.arange(3 * sr) / 480)
 kw = dict(format=FOUR, age=0, wow=0, flutter=0)
-hl = db(rms(sosfilt(hpf, p.run(xt, sr, hiss=5, **kw)[:, 0] - p.run(xt, sr, hiss=0, **kw)[:, 0])[sr:]))
+hl = db(rms(sosfilt(hpf, p.run(xt, sr, hiss=10, **kw)[:, 0] - p.run(xt, sr, hiss=1, **kw)[:, 0])[sr:]))
 check('4-track: hiss hides in silence, breathes in under signal', hq < -100 and hl > hq + 30, 'silence %.1f, under a tone %.1f dBFS' % (hq, hl))
 # 4-track: the compander mistracks a little on attacks (punch), never a lot
 xp = harmonic_pluck_train(sr, 9.0)
@@ -179,6 +182,28 @@ ya = p.run(xp, sr, format=FOUR, age=0, wow=0, flutter=0)[:, 0]; yb = p.run(xp, s
 pkf = lambda w_: [np.abs(w_[int((0.2 + 1.5 * k) * sr):int((0.2 + 1.5 * k + 0.05) * sr)]).max() for k in range(6)]
 ov = max(db(a_ / b_) for a_, b_ in zip(pkf(ya), pkf(yb)))
 check('4-track attack overshoot under 3 dB', ov < 3.0, '%+.1f dB worst' % ov)
+
+# Noise owns the grain (the rasp on a held note): none at 0, the format's own at 1; Pocket and Answering keep theirs
+def grit(y):
+    seg = y[int(1.5 * sr):int(3.5 * sr)]; N = len(seg); f0 = 82.41
+    S_ = np.abs(np.fft.rfft(seg * np.hanning(N))) ** 2; fr = np.fft.rfftfreq(N, 1 / sr)
+    harm = np.zeros_like(fr, bool)
+    for k in range(1, 240): harm |= np.abs(fr - k * f0) < 2.0
+    band = (fr > 20) & (fr < 16000)
+    return 10 * np.log10(S_[band & ~harm].sum() / S_[band & harm].sum())
+tt = np.arange(int(3.5 * sr)) / sr
+lowE = sum(np.sin(2 * np.pi * k * 82.41 * tt + 0.3 * k) / k for k in range(1, 25))
+lowE = lowE / np.abs(lowE).max() * 0.15 * np.minimum(1, tt / 0.02)
+kw = dict(wow=0, flutter=0)
+g0 = {f: grit(p.run(lowE, sr, format=f, hiss=0, **kw)[:, 0]) for f in (WALKMAN, EIGHT, FOUR, POCKET, ANSWER)}
+g1 = {f: grit(p.run(lowE, sr, format=f, hiss=1, **kw)[:, 0]) for f in (WALKMAN, EIGHT, FOUR, POCKET)}
+check('Noise 0: no rasp on walkman, 8-track, 4-track', all(g0[f] < -47 for f in (WALKMAN, EIGHT, FOUR)),
+      ' '.join('%s %.1f' % (NAMES[f], g0[f]) for f in (WALKMAN, EIGHT, FOUR)) + ' dB re the note')
+check('Noise 1: the grain is back (no hiss yet)', all(g1[f] > g0[f] + 3 for f in (WALKMAN, EIGHT, FOUR)),
+      ' '.join('%s %.1f' % (NAMES[f], g1[f]) for f in (WALKMAN, EIGHT, FOUR)) + ' dB')
+check('Pocket the same at Noise 0 and 1', abs(g1[POCKET] - g0[POCKET]) < 0.5, '%.1f / %.1f dB' % (g0[POCKET], g1[POCKET]))
+check('Pocket and Answering keep their grit at Noise 0', g0[POCKET] > -35 and g0[ANSWER] > -35,
+      'pocket %.1f, answering %.1f dB' % (g0[POCKET], g0[ANSWER]))
 
 # Switching Format or Tape mid-note doesn't click
 xs = 0.15 * np.sin(2 * np.pi * 330 * np.arange(3 * sr) / sr)
@@ -240,10 +265,10 @@ for ps in presets:
     vals = {}
     for port in gp.objects(ps, LV2.port):
         vals[str(gp.value(port, LV2.symbol))] = float(gp.value(port, PSET.value))
-    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals and vals.get('hiss') == 0
+    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals and vals.get('hiss') <= 1
     y = p.run(x, sr, **vals)[:, 0]
     d = db(rms(y[sr:]) / rms(x[sr:])); ok &= abs(d) < 3.0
     res.append('%s %+.1f' % (gp.value(ps, RDFS.label), d))
-check('10 factory presets load, hiss off, within 3 dB of bypass', ok, '; '.join(res))
+check('10 factory presets load, no hiss (Noise 0 or 1), within 3 dB of bypass', ok, '; '.join(res))
 
 done()

@@ -19,7 +19,7 @@ Most tape plugins model one good machine. Tapestry models the mechanisms, so the
 - **The wobble comes from the hardware.** Wow and flutter are built from each machine's capstan, reels, belts and motor, at the rates their geometry sets. A mastering deck barely moves; a pocket recorder never sits still.
 - **Tape physics, not a filter.** Hot treble wipes itself off the tape first, so your pick attack smooths out while the body stays full. Every format gets its own head bump, the low end tape is loved for.
 - **It ages.** Stretched belts, worn heads and thin oxide: more wobble, a duller top and the odd dropout.
-- **Clean by default.** Hiss starts at zero. Bring it in when you want it, at each format's real noise floor.
+- **Clean when you want it.** Noise at zero takes away the hiss and the grain. Turn it up for the rasp, then the hiss, all the way to each format's real noise floor. The pocket recorder and answering machine keep their grit whatever you do: that's who they are.
 
 ## Controls
 
@@ -33,7 +33,7 @@ Most tape plugins model one good machine. Tapestry models the mechanisms, so the
 | **Wow** | The slow, seasick drift: 0 to 200 % of the machine's own |
 | **Flutter** | The fast shimmer: 0 to 200 % of the machine's own |
 | **Age** | New to old. Belts stretch, heads wear, the top end dulls and dropouts creep in |
-| **Hiss** | Off to 10. At 5 you hear the format's real noise floor; 10 is 10 dB more |
+| **Noise** | Tape noise, in two stages. **0**: clean, no hiss, no grain. **1**: the tape's grain, the fine rasp it puts on every note, with no hiss. **2 to 10**: the hiss fades in, up to the format's real noise floor at 10. Pocket and Answering keep their grain at every setting |
 | **Tone** | A tilt around 800 Hz: dark to the left, bright to the right, flat at the top |
 | **On/Off** | Bypass, click-free; the dry passes at unity. The red light shows it's on |
 

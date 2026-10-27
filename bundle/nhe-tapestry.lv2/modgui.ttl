@@ -19,7 +19,7 @@
         [ lv2:index 4 ; lv2:symbol "wow" ;     lv2:name "Wow" ; ],
         [ lv2:index 5 ; lv2:symbol "flutter" ; lv2:name "Flutter" ; ],
         [ lv2:index 6 ; lv2:symbol "age" ;     lv2:name "Age" ; ],
-        [ lv2:index 7 ; lv2:symbol "hiss" ;    lv2:name "Hiss" ; ],
+        [ lv2:index 7 ; lv2:symbol "hiss" ;    lv2:name "Noise" ; ],
         [ lv2:index 8 ; lv2:symbol "mix" ;     lv2:name "Mix" ; ],
         [ lv2:index 9 ; lv2:symbol "level" ;   lv2:name "Level" ; ] ;
     ] .
