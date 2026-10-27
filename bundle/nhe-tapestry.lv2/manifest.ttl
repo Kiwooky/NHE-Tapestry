@@ -1,0 +1,68 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<urn:mod-cookbook:nhe-tapestry>
+    a lv2:Plugin , lv2:SimulatorPlugin ;
+    lv2:binary <nhe-tapestry_dsp.so> ;
+    rdfs:seeAlso <nhe-tapestry.ttl> , <modgui.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#always-on>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Always on" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#walkman-cheap>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Walkman, cheap tape" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#walkman-chrome>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Walkman, chrome" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#studio-half-inch>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Studio half-inch" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#home-reel>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Home reel-to-reel" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#pocket-dictaphone>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Pocket dictaphone" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#answering-machine>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Answering machine" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#vhs-linear>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "VHS linear" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#eight-track>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "8-track cartridge" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry#bedroom-four-track>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry> ;
+    rdfs:label "Bedroom 4-track" ;
+    rdfs:seeAlso <presets.ttl> .

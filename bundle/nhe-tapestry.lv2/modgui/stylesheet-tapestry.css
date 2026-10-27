@@ -1,0 +1,108 @@
+/* Tapestry - New Horizon Electronics (650 x 400 CSS px). Artwork by Niels.
+   Images are 2x, drawn at their 1x size; positions measured from the v1 mockup.
+   The LCD font is loaded from the plugin's own resources. Two things make a web font work in mod-ui:
+   - mod-ui injects this stylesheet into the page, so a relative url() resolves against the page:
+     every url() must be /resources/<file>{{{ns}}}, which carries the plugin's URI.
+   - mod-ui's main.css sets  * { font-family: "cooper hewitt", Sans-serif !important }  on every
+     element, so the face's font-family needs !important too (its class selector then wins).
+   lcd.woff2: "lcd phone" (Grafito Design), with minus, plus and full stop added on its own 5 x 7
+   dot grid, a standard Unicode map instead of its Symbol one, cut down to the LCD's characters. */
+@font-face {
+    font-family: 'TapestryLCD';
+    src: url(/resources/lcd.woff2{{{ns}}}) format('woff2');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.tapestry{{{cns}}} {
+    position: absolute;
+    width: 650px;
+    height: 400px;
+    background-image: url(/resources/background.jpg{{{ns}}});
+    background-size: 650px 400px;
+    background-repeat: no-repeat;
+    border-radius: 4px;
+}
+
+/* LCD text: 15.625 px gives the mockup's 12.5 px cap height (the dots fill 0..800 of 1000 units) */
+.tapestry{{{cns}}} .tp-lcd {
+    position: absolute; top: 48.45px; height: 16.5px;
+    font-family: 'TapestryLCD', monospace !important; font-size: 16.25px; line-height: 16.5px;
+    color: rgb(60, 57, 20); white-space: nowrap; overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    pointer-events: none; z-index: 20;
+}
+.tapestry{{{cns}}} .tp-val { width: 36px; text-align: right; letter-spacing: -0.6px; margin-right: 0.6px; }   /* tighter, so "100" clears the divider */
+.tapestry{{{cns}}} .tp-val-drive { left: 24px; }      /* right edges 60, 100, 137.5 px (fitted to the mockup) */
+.tapestry{{{cns}}} .tp-val-level { left: 64px; }
+.tapestry{{{cns}}} .tp-val-mix   { left: 101.5px; }
+.tapestry{{{cns}}} .tp-fmt { left: 229px; width: 162px; text-align: left; letter-spacing: 1.05px; }   /* the mockup's tracking */
+
+/* sliders: 35 x 73 cap in a 280.5 px channel, so it travels 207.5 px (top = max) */
+.tapestry{{{cns}}} .tp-track { position: absolute; top: 95px; width: 40px; height: 280.5px; cursor: pointer; z-index: 21; }
+.tapestry{{{cns}}} .tp-track-drive { left: 22.25px; }   /* channel centres 42.25, 84, 126 px */
+.tapestry{{{cns}}} .tp-track-level { left: 64px; }
+.tapestry{{{cns}}} .tp-track-mix   { left: 106px; }
+.tapestry{{{cns}}} .tp-cap { position: absolute; left: 2.5px; top: 124.5px; width: 35px; height: 73px;
+    background-image: url(/resources/slider-cap.png{{{ns}}}); background-size: 35px 73px; pointer-events: none; }
+/* defaults until the script runs (and for the screenshot): Drive 0 dB, Level 0 dB, Mix 100 % */
+.tapestry{{{cns}}} .tp-track-level .tp-cap { top: 103.75px; }
+.tapestry{{{cns}}} .tp-track-mix .tp-cap   { top: 0; }
+
+/* step buttons */
+.tapestry{{{cns}}} .tp-btn { position: absolute; left: 156.5px; width: 52.5px; height: 54px; background-size: 52.5px 54px; cursor: pointer; z-index: 22; }
+.tapestry{{{cns}}} .tp-btn-format { top: 21px; background-image: url(/resources/format-btn.png{{{ns}}}); }
+.tapestry{{{cns}}} .tp-btn-format.down { background-image: url(/resources/format-btn-down.png{{{ns}}}); }
+.tapestry{{{cns}}} .tp-btn-tape { top: 72px; background-image: url(/resources/tape-btn.png{{{ns}}}); }
+.tapestry{{{cns}}} .tp-btn-tape.down { background-image: url(/resources/tape-btn-down.png{{{ns}}}); }
+
+/* Tape lights: lit art centred on the panel's unlit bars */
+.tapestry{{{cns}}} .tp-led { position: absolute; left: 158.25px; width: 49.5px; height: 17.5px; background-size: 49.5px 17.5px; background-repeat: no-repeat; z-index: 20; pointer-events: none; }
+.tapestry{{{cns}}} .tp-led.on { background-image: url(/resources/led-green.png{{{ns}}}); }
+.tapestry{{{cns}}} .tp-led-0 { top: 146px; left: 158px; }
+.tapestry{{{cns}}} .tp-led-1 { top: 184px; }
+.tapestry{{{cns}}} .tp-led-2 { top: 222.25px; }
+.tapestry{{{cns}}} .tp-led-3 { top: 260.75px; }
+/* click zones: each label + its light */
+.tapestry{{{cns}}} .tp-pick { position: absolute; left: 157px; width: 52px; height: 37px; cursor: pointer; z-index: 23; }
+.tapestry{{{cns}}} .tp-pick-0 { top: 129px; }
+.tapestry{{{cns}}} .tp-pick-1 { top: 167px; }
+.tapestry{{{cns}}} .tp-pick-2 { top: 205.25px; }
+.tapestry{{{cns}}} .tp-pick-3 { top: 243.75px; }
+
+/* On/Off: the red light is lit while the effect runs (bypass-light is not inverted) */
+.tapestry{{{cns}}} .tp-onoff-led { position: absolute; left: 156.5px; top: 308px; width: 51.5px; height: 19.5px; background-size: 51.5px 19.5px; background-repeat: no-repeat; z-index: 20; }
+.tapestry{{{cns}}} .tp-onoff-led.on { background-image: url(/resources/led-red.png{{{ns}}}); }
+/* the button: pressed art only while it's held down (the light shows the state, as in the mockup) */
+.tapestry{{{cns}}} .tp-onoff { position: absolute; left: 155px; top: 324px; width: 55.5px; height: 56.5px;
+    background-image: url(/resources/onoff.png{{{ns}}}); background-size: 55.5px 56.5px; cursor: pointer; z-index: 22; }
+.tapestry{{{cns}}} .tp-onoff:active { background-image: url(/resources/onoff-down.png{{{ns}}}); }
+
+/* knobs: 64 x 64 frames, 65 frames in one horizontal 2x strip. Whole pixels on purpose:
+   mod-ui's film widget reads the strip height with parseInt and the element width with
+   Math.round, so a 63.5 px knob would drift by a fraction of a frame per step */
+.tapestry{{{cns}}} .tp-knob {
+    position: absolute; width: 64px; height: 64px;
+    background-image: url(/resources/knob.png{{{ns}}}); background-size: auto 64px; background-repeat: no-repeat; background-position: 0 0;
+    cursor: pointer; z-index: 21;
+}
+.tapestry{{{cns}}} .tp-wow     { left: 227.25px; top: 97.75px; }
+.tapestry{{{cns}}} .tp-flutter { left: 319.25px; top: 97.75px; }
+.tapestry{{{cns}}} .tp-age     { left: 227.25px; top: 196.75px; }
+.tapestry{{{cns}}} .tp-hiss    { left: 319.25px; top: 196.75px; }
+.tapestry{{{cns}}} .tp-tone    { left: 227.25px; top: 300.25px; }
+
+/* the machine's picture, one per Format */
+.tapestry{{{cns}}} .tp-tape { position: absolute; left: 427px; top: 31.5px; width: 126px; height: 336.5px; background-size: 126px 336.5px; background-repeat: no-repeat; z-index: 19; pointer-events: none; }
+.tapestry{{{cns}}} .tp-tape-0 { background-image: url(/resources/tape-0.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-1 { background-image: url(/resources/tape-1.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-2 { background-image: url(/resources/tape-2.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-3 { background-image: url(/resources/tape-3.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-4 { background-image: url(/resources/tape-4.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-5 { background-image: url(/resources/tape-5.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-6 { background-image: url(/resources/tape-6.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-7 { background-image: url(/resources/tape-7.jpg{{{ns}}}); }
+.tapestry{{{cns}}} .tp-tape-8 { background-image: url(/resources/tape-8.jpg{{{ns}}}); }
+
+.tapestry{{{cns}}} .mod-pedal-input,
+.tapestry{{{cns}}} .mod-pedal-output { top: 170px; }

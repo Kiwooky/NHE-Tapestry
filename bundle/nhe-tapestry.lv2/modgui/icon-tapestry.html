@@ -1,0 +1,59 @@
+<div class="mod-pedal tapestry{{{cns}}}">
+    <div mod-role="drag-handle" class="mod-drag-handle"></div>
+
+    <!-- LCD 1: Drive, Level, Mix values (LCD web font; "DB DB %" are in the panel art) -->
+    <div class="tp-lcd tp-val tp-val-drive" tp-show="lcd-drive">0</div>
+    <div class="tp-lcd tp-val tp-val-level" tp-show="lcd-level">0</div>
+    <div class="tp-lcd tp-val tp-val-mix" tp-show="lcd-mix">100</div>
+
+    <!-- LCD 2: the format's name ("TAPE FORMAT" is in the panel art) -->
+    <div class="tp-lcd tp-fmt" tp-show="lcd-format">WALKMAN</div>
+
+    <!-- sliders: script-driven, drag or press anywhere along the channel -->
+    <div class="tp-track tp-track-drive" title="Drive: -12 to +18 dB" tp-slider="drive"><div class="tp-cap"></div></div>
+    <div class="tp-track tp-track-level" title="Level: -12 to +12 dB" tp-slider="level"><div class="tp-cap"></div></div>
+    <div class="tp-track tp-track-mix" title="Mix: 0 to 100 %" tp-slider="mix"><div class="tp-cap"></div></div>
+
+    <!-- step buttons: red steps Format, grey steps Tape -->
+    <div class="tp-btn tp-btn-format" title="Format: next machine" tp-step="format"></div>
+    <div class="tp-btn tp-btn-tape" title="Tape: next formulation" tp-step="tape"></div>
+
+    <!-- Tape lights (off state is in the panel art); each label + light is also a click zone -->
+    <div class="tp-led tp-led-0" tp-led="0"></div>
+    <div class="tp-led tp-led-1 on" tp-led="1"></div>
+    <div class="tp-led tp-led-2" tp-led="2"></div>
+    <div class="tp-led tp-led-3" tp-led="3"></div>
+    <div class="tp-pick tp-pick-0" title="Type 0 (cheap tape)" tp-pick="tape" tp-value="0"></div>
+    <div class="tp-pick tp-pick-1" title="Ferric" tp-pick="tape" tp-value="1"></div>
+    <div class="tp-pick tp-pick-2" title="Chrome" tp-pick="tape" tp-value="2"></div>
+    <div class="tp-pick tp-pick-3" title="Metal" tp-pick="tape" tp-value="3"></div>
+
+    <!-- On/Off: red light and the silver button -->
+    <div class="tp-onoff-led on" mod-role="bypass-light"></div>
+    <div class="tp-onoff" title="On/Off" mod-role="bypass"></div>
+
+    <!-- knobs: 65-frame strip, knurl turns, lighting stays -->
+    <div class="tp-knob tp-wow"     title="Wow"     mod-role="input-control-port" mod-port-symbol="wow"></div>
+    <div class="tp-knob tp-flutter" title="Flutter" mod-role="input-control-port" mod-port-symbol="flutter"></div>
+    <div class="tp-knob tp-age"     title="Age: new .. old" mod-role="input-control-port" mod-port-symbol="age"></div>
+    <div class="tp-knob tp-hiss"    title="Hiss: off .. 10" mod-role="input-control-port" mod-port-symbol="hiss"></div>
+    <div class="tp-knob tp-tone"    title="Tone: dark .. bright" mod-role="input-control-port" mod-port-symbol="tone"></div>
+
+    <!-- the machine's picture follows Format -->
+    <div class="tp-tape tp-tape-2" tp-show="picture"></div>
+
+    <div class="mod-pedal-input">
+        {{#effect.ports.audio.input}}
+        <div class="mod-input mod-input-disconnected" title="{{name}}" mod-role="input-audio-port" mod-port-symbol="{{symbol}}">
+            <div class="mod-pedal-input-image"></div>
+        </div>
+        {{/effect.ports.audio.input}}
+    </div>
+    <div class="mod-pedal-output">
+        {{#effect.ports.audio.output}}
+        <div class="mod-output mod-output-disconnected" title="{{name}}" mod-role="output-audio-port" mod-port-symbol="{{symbol}}">
+            <div class="mod-pedal-output-image"></div>
+        </div>
+        {{/effect.ports.audio.output}}
+    </div>
+</div>
