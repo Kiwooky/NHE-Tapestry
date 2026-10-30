@@ -10,7 +10,7 @@
 #define TAPESTRY_LABEL             "TapestryStereo"
 #define TAPESTRY_DESCRIPTION       "Stereo tape machines from studio reel to answering machine: two tracks on one transport, wow, flutter, saturation and tape's low end."
 #define TAPESTRY_UNIQUE_ID         d_cconst('n', 'T', 'p', 'S')
-#define TAPESTRY_VERSION           d_version(1, 0, 0)   // = lv2:minorVersion 2, microVersion 0
+#define TAPESTRY_VERSION           d_version(1, 0, 1)   // = lv2:minorVersion 2, microVersion 1
 
 #define DISTRHO_PLUGIN_HAS_UI       0
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1

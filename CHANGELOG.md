@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.9 (build 9) and Stereo 1.0.1 (build 1)
+
+- Factory presets no longer set Mix: loading one leaves your dry/tape balance where it is. Sound otherwise unchanged.
+
 ## Tapestry Stereo 1.0.0 (build 0): two tracks, one tape
 
 - New plugin, `urn:mod-cookbook:nhe-tapestry-stereo`: the mono source built with two inputs (`plugins/nhe-tapestry-stereo`), Niels's face with a STEREO badge.

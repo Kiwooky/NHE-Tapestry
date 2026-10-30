@@ -13,11 +13,11 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PLUGINS = {
     'mono': dict(
-        bundle='nhe-tapestry', uri='urn:mod-cookbook:nhe-tapestry', name='Tapestry', micro=8,
+        bundle='nhe-tapestry', uri='urn:mod-cookbook:nhe-tapestry', name='Tapestry', micro=9,
         comment="Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end.",
         audio=[('in', 'In', 'in'), ('out', 'Out', 'out')]),
     'stereo': dict(
-        bundle='nhe-tapestry-stereo', uri='urn:mod-cookbook:nhe-tapestry-stereo', name='Tapestry Stereo', micro=0,
+        bundle='nhe-tapestry-stereo', uri='urn:mod-cookbook:nhe-tapestry-stereo', name='Tapestry Stereo', micro=1,
         comment="Stereo tape machines from studio reel to answering machine: two tracks on one transport, wow, flutter, saturation and tape's low end.",
         audio=[('in_l', 'In L', 'in'), ('in_r', 'In R', 'in'), ('out_l', 'Out L', 'out'), ('out_r', 'Out R', 'out')]),
 }
@@ -121,7 +121,8 @@ def write(which):
     rdfs:seeAlso <%s.ttl> , <modgui.ttl> .
 """ % (U, P['bundle'], P['bundle'])
     for key, label, fm, tp, dr, to, wo, fl, ag, nz in PRESETS:
-        vals = dict(format=fm, tape=tp, drive=dr, tone=to, wow=wo, flutter=fl, age=ag, hiss=nz, mix=100, level=0)
+        # No Mix: presets set the machine, not the balance, so loading one leaves your Mix where it is
+        vals = dict(format=fm, tape=tp, drive=dr, tone=to, wow=wo, flutter=fl, age=ag, hiss=nz, level=0)
         ports = ' ,\n'.join('        [ lv2:symbol "%s" ; pset:value %s ]' % (k, float(v)) for k, v in vals.items())
         pre += """
 <%s#%s>

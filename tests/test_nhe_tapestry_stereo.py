@@ -149,7 +149,7 @@ presets = list(gp.subjects(rdflib.RDF.type, PSET.Preset))
 ok = len(presets) == 10 and all('nhe-tapestry-stereo#' in str(s_) for s_ in presets)
 for ps in presets:
     vals = {str(gp.value(port, LV2.symbol)): float(gp.value(port, PSET.value)) for port in gp.objects(ps, LV2.port)}
-    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals
-check('10 factory presets, for the stereo URI', ok, '%d presets' % len(presets))
+    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals and 'mix' not in vals
+check('10 factory presets, for the stereo URI, leaving Mix alone', ok, '%d presets' % len(presets))
 
 done()

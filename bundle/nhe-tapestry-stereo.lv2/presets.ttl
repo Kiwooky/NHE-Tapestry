@@ -15,7 +15,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 0.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#walkman-cheap>
@@ -31,7 +30,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#walkman-chrome>
@@ -47,7 +45,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#studio-half-inch>
@@ -63,7 +60,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 1.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#home-reel>
@@ -79,7 +75,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#pocket-dictaphone>
@@ -95,7 +90,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 4.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#answering-machine>
@@ -111,7 +105,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 6.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#vhs-linear>
@@ -127,7 +120,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#eight-track>
@@ -143,7 +135,6 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#bedroom-four-track>
@@ -159,5 +150,4 @@
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .

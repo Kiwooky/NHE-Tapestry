@@ -20,7 +20,7 @@ define NHE_TAPESTRY_STEREO_SRC1
 #define TAPESTRY_LABEL             "TapestryStereo"
 #define TAPESTRY_DESCRIPTION       "Stereo tape machines from studio reel to answering machine: two tracks on one transport, wow, flutter, saturation and tape's low end."
 #define TAPESTRY_UNIQUE_ID         d_cconst('n', 'T', 'p', 'S')
-#define TAPESTRY_VERSION           d_version(1, 0, 0)   // = lv2:minorVersion 2, microVersion 0
+#define TAPESTRY_VERSION           d_version(1, 0, 1)   // = lv2:minorVersion 2, microVersion 1
 
 #define DISTRHO_PLUGIN_HAS_UI       0
 #define DISTRHO_PLUGIN_IS_RT_SAFE   1
@@ -261,7 +261,7 @@ static const int      kCh = DISTRHO_PLUGIN_NUM_INPUTS;   // 1 = mono, 2 = stereo
 #define TAPESTRY_LABEL        "Tapestry"
 #define TAPESTRY_DESCRIPTION  "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."
 #define TAPESTRY_UNIQUE_ID    d_cconst('n', 'T', 'p', 's')
-#define TAPESTRY_VERSION      d_version(1, 0, 8)   // = lv2:minorVersion 2, microVersion 8
+#define TAPESTRY_VERSION      d_version(1, 0, 9)   // = lv2:minorVersion 2, microVersion 9
 #endif
 
 // one track on the tape: everything that happens to it alone
@@ -932,7 +932,7 @@ define NHE_TAPESTRY_STEREO_FILE6
     doap:maintainer [ foaf:name "New Horizon" ] ;
     rdfs:comment "Stereo tape machines from studio reel to answering machine: two tracks on one transport, wow, flutter, saturation and tape's low end." ;
     lv2:minorVersion 2 ;
-    lv2:microVersion 0 ;
+    lv2:microVersion 1 ;
     lv2:optionalFeature lv2:hardRTCapable ;
     lv2:requiredFeature <http://lv2plug.in/ns/ext/options#options> ,
                         <http://lv2plug.in/ns/ext/urid#map> ;
@@ -1090,7 +1090,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 0.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 0.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#walkman-cheap>
@@ -1106,7 +1105,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#walkman-chrome>
@@ -1122,7 +1120,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#studio-half-inch>
@@ -1138,7 +1135,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 1.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#home-reel>
@@ -1154,7 +1150,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#pocket-dictaphone>
@@ -1170,7 +1165,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 4.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#answering-machine>
@@ -1186,7 +1180,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 6.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#vhs-linear>
@@ -1202,7 +1195,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 3.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#eight-track>
@@ -1218,7 +1210,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 5.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 
 <urn:mod-cookbook:nhe-tapestry-stereo#bedroom-four-track>
@@ -1234,7 +1225,6 @@ define NHE_TAPESTRY_STEREO_FILE7
         [ lv2:symbol "flutter" ; pset:value 100.0 ] ,
         [ lv2:symbol "age" ; pset:value 2.0 ] ,
         [ lv2:symbol "hiss" ; pset:value 1.0 ] ,
-        [ lv2:symbol "mix" ; pset:value 100.0 ] ,
         [ lv2:symbol "level" ; pset:value 0.0 ] .
 endef
 

@@ -69,6 +69,8 @@ Same controls, presets and face (with its own STEREO badge). Patch one source in
 
 ## Factory presets
 
+Presets set the machine, not the balance: loading one leaves your Mix where it is.
+
 | Preset | Sound |
 | --- | --- |
 | **Always on** | Master reel with a little Drive. Glue, not grit: leave it on all night |

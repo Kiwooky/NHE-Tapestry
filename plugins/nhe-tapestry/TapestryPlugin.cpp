@@ -200,7 +200,7 @@ static const int      kCh = DISTRHO_PLUGIN_NUM_INPUTS;   // 1 = mono, 2 = stereo
 #define TAPESTRY_LABEL        "Tapestry"
 #define TAPESTRY_DESCRIPTION  "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."
 #define TAPESTRY_UNIQUE_ID    d_cconst('n', 'T', 'p', 's')
-#define TAPESTRY_VERSION      d_version(1, 0, 8)   // = lv2:minorVersion 2, microVersion 8
+#define TAPESTRY_VERSION      d_version(1, 0, 9)   // = lv2:minorVersion 2, microVersion 9
 #endif
 
 // one track on the tape: everything that happens to it alone

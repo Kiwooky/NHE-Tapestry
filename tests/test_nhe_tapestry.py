@@ -253,7 +253,7 @@ ref = max(max_step(p.run(xs, sr, format=MASTER, tone=t, level=l)[:, 0][sr // 2:]
 st = max_step(y[int(0.45 * sr):]) / ref
 check('tone and level moves: no click', st < 1.1, 'max step %.2fx the loudest steady setting it passes through' % st)
 
-# Factory presets: each one parses, sets only real ports, and lands within 3 dB of bypass
+# Factory presets: each one parses, sets only real ports, leaves Mix alone, and lands within 3 dB of bypass
 import rdflib
 from rdflib.namespace import RDFS
 LV2 = rdflib.Namespace('http://lv2plug.in/ns/lv2core#'); PSET = rdflib.Namespace('http://lv2plug.in/ns/ext/presets#')
@@ -265,10 +265,10 @@ for ps in presets:
     vals = {}
     for port in gp.objects(ps, LV2.port):
         vals[str(gp.value(port, LV2.symbol))] = float(gp.value(port, PSET.value))
-    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals and vals.get('hiss') <= 1
+    ok &= set(vals) <= set(ORDER) and 'lv2_enabled' not in vals and 'mix' not in vals and vals.get('hiss') <= 1
     y = p.run(x, sr, **vals)[:, 0]
     d = db(rms(y[sr:]) / rms(x[sr:])); ok &= abs(d) < 3.0
     res.append('%s %+.1f' % (gp.value(ps, RDFS.label), d))
-check('10 factory presets load, no hiss (Noise 0 or 1), within 3 dB of bypass', ok, '; '.join(res))
+check('10 factory presets load, leave Mix alone, no hiss (Noise 0 or 1), within 3 dB of bypass', ok, '; '.join(res))
 
 done()
