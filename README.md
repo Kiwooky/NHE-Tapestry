@@ -57,7 +57,7 @@ Mono in, mono out. The tape adds 6 ms of latency (the wobble needs room to swing
 
 ### Tapestry Stereo
 
-For stereo sources (a keyboard, a stereo chorus or reverb before it) there's a second plugin, **Tapestry Stereo**: upload `dist/nhe-tapestry-stereo.mk` the same way. Two tracks on one tape:
+For stereo sources (a keyboard, a stereo chorus or reverb before it) there's a second plugin, **Tapestry Stereo**: upload `mod-plugin-builder/nhe-tapestry-stereo/nhe-tapestry-stereo.mk` the same way. Two tracks on one tape:
 
 - **One transport.** Both sides wobble together, exactly as one capstan pulls both tracks. No accidental chorus.
 - **Two tracks.** Each side has its own grain, hiss and saturation, so the noise has real width.
@@ -86,7 +86,13 @@ Presets set the machine, not the balance: loading one leaves your Mix where it i
 
 ## Install
 
-**Test builds:** upload `dist/nhe-tapestry.mk` (or `dist/nhe-tapestry-stereo.mk`) to <https://builder.mod.audio/buildroot> with your MOD connected over USB, then click Install. The recipes are built by the test gates (below).
+1. Connect your MOD by USB.
+2. Open [builder.mod.audio](https://builder.mod.audio/buildroot) in Chrome and upload
+   `mod-plugin-builder/nhe-tapestry/nhe-tapestry.mk` from this repo
+   (or `mod-plugin-builder/nhe-tapestry-stereo/nhe-tapestry-stereo.mk` for Tapestry Stereo).
+3. When the build finishes, click **Install**.
+
+The builder fetches this repo at the commit named in the file (`NHE_TAPESTRY_VERSION`). After pushing a change, paste the new full 40-character commit hash there.
 
 **MOD Plugin Store:** not yet.
 
@@ -95,8 +101,9 @@ Presets set the machine, not the balance: loading one leaves your Mix where it i
 Built with the [MOD plugin playbook](https://github.com/Kiwooky/MOD-plugin-playbook). With the playbook checked out next to this repo:
 
 ```sh
-bash tools/check.sh            # mono: builds native, Duo and Duo X/Dwarf, checks the TTL, runs the tests, writes dist/nhe-tapestry.mk
-bash tools/check_stereo.sh     # stereo: the same, plus a comparison with the mono build; writes dist/nhe-tapestry-stereo.mk
+make                           # bin/nhe-tapestry.lv2 (make NAME=nhe-tapestry-stereo for the stereo one)
+bash tools/check.sh            # mono: builds native, Duo and Duo X/Dwarf, checks the TTL, runs the tests, writes a test recipe to dist/ (not committed)
+bash tools/check_stereo.sh     # stereo: the same, plus a comparison with the mono build; the same
 python3 tools/gen_ttl.py       # rewrites both bundles' ports, presets and manifests from one table
 ```
 
@@ -113,8 +120,10 @@ The design, the formats' numbers and what's been measured: [SPEC.md](SPEC.md). W
 | `bundle/nhe-tapestry.lv2/` | LV2 metadata, factory presets, pedal face (template, CSS, script, images, LCD font) |
 | `bundle/nhe-tapestry-stereo.lv2/` | Stereo metadata and presets, plus its own panel, screenshot and thumbnail; the rest of the face is borrowed from the mono bundle at build time |
 | `tests/` | Audio test suites, mono and stereo |
+| `mod-plugin-builder/` | The package files for MOD's builder, one per plugin |
+| `Makefile` | Top-level build: plugin, bundle, install |
+| `dpf/` | [DPF](https://github.com/DISTRHO/DPF), as a git submodule |
 | `tools/` | Gate scripts and the TTL generator |
-| `dist/` | The single-file recipes for MOD's builder (generated) |
 
 ## Licence
 

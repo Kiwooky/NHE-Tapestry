@@ -1,5 +1,9 @@
 # Changelog
 
+## Repo build (no version change)
+
+- Built from this repo like Ouraverb: `mod-plugin-builder/nhe-tapestry/nhe-tapestry.mk` and `…/nhe-tapestry-stereo/nhe-tapestry-stereo.mk` fetch the repo at a commit, and the top-level `Makefile` builds either plugin. The single-file recipes in `dist/` are no longer committed.
+
 ## 1.0.9 (build 9) and Stereo 1.0.1 (build 1)
 
 - Factory presets no longer set Mix: loading one leaves your dry/tape balance where it is. Sound otherwise unchanged.

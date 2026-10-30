@@ -3,7 +3,7 @@
 # face, and check.sh wants each in one folder, so stage a merged copy first. It also builds the
 # mono plugin (native and Duo) so the tests can hold the stereo one against it on both machines.
 #   bash tools/check_stereo.sh [--no-qemu]          (playbook next to this repo, or set PB=...)
-# Writes dist/nhe-tapestry-stereo.mk.
+# Writes a test recipe, dist/nhe-tapestry-stereo.mk (not committed: the builder uses mod-plugin-builder/).
 set -euo pipefail
 cd "$(dirname "$0")/.."
 PB="${PB:-../MOD-plugin-playbook}"
