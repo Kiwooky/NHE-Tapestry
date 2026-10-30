@@ -1,0 +1,68 @@
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix pset: <http://lv2plug.in/ns/ext/presets#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo>
+    a lv2:Plugin , lv2:SimulatorPlugin ;
+    lv2:binary <nhe-tapestry-stereo_dsp.so> ;
+    rdfs:seeAlso <nhe-tapestry-stereo.ttl> , <modgui.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#always-on>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Always on" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#walkman-cheap>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Walkman, cheap tape" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#walkman-chrome>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Walkman, chrome" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#studio-half-inch>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Studio half-inch" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#home-reel>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Home reel-to-reel" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#pocket-dictaphone>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Pocket dictaphone" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#answering-machine>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Answering machine" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#vhs-linear>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "VHS linear" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#eight-track>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "8-track cartridge" ;
+    rdfs:seeAlso <presets.ttl> .
+
+<urn:mod-cookbook:nhe-tapestry-stereo#bedroom-four-track>
+    a pset:Preset ;
+    lv2:appliesTo <urn:mod-cookbook:nhe-tapestry-stereo> ;
+    rdfs:label "Bedroom 4-track" ;
+    rdfs:seeAlso <presets.ttl> .

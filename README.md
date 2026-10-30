@@ -55,6 +55,18 @@ The LCDs show Drive, Level and Mix in dB and %, and the machine's name. Drag a s
 
 Mono in, mono out. The tape adds 6 ms of latency (the wobble needs room to swing both ways). Changing Format or Tape mutes for about 40 ms while the machine swaps, so it never clicks.
 
+### Tapestry Stereo
+
+For stereo sources (a keyboard, a stereo chorus or reverb before it) there's a second plugin, **Tapestry Stereo**: upload `dist/nhe-tapestry-stereo.mk` the same way. Two tracks on one tape:
+
+- **One transport.** Both sides wobble together, exactly as one capstan pulls both tracks. No accidental chorus.
+- **Two tracks.** Each side has its own grain, hiss and saturation, so the noise has real width.
+- **Head azimuth.** A worn, misaligned head reads the right track a few microseconds late, smearing the very top between the sides. It grows with Age and is bigger on slow tape: about 40 µs on a cassette at Age 10, 80 on the dictaphone, almost none on the mastering reel. Sum it to mono and you'll hear the classic dull, phasey worn-deck top end.
+- **Linked level.** The auto level control and the 4-track's noise reduction listen to both sides, so a hit on one side moves both and the image never lurches.
+- **Every format stays stereo**, even the ones that were mono in real life: impossible combinations welcome.
+
+Same controls, presets and face (with its own STEREO badge). Patch one source into both inputs and the left side is the mono Tapestry. It uses about 1.7 times the CPU of the mono version, up to 2 times on the 4-track with Noise up.
+
 ## Factory presets
 
 | Preset | Sound |
@@ -72,7 +84,7 @@ Mono in, mono out. The tape adds 6 ms of latency (the wobble needs room to swing
 
 ## Install
 
-**Test builds:** upload `nhe-tapestry.mk` to <https://builder.mod.audio/buildroot> with your MOD connected over USB, then click Install. The recipe is built into `dist/` by the test gate (below).
+**Test builds:** upload `dist/nhe-tapestry.mk` (or `dist/nhe-tapestry-stereo.mk`) to <https://builder.mod.audio/buildroot> with your MOD connected over USB, then click Install. The recipes are built by the test gates (below).
 
 **MOD Plugin Store:** not yet.
 
@@ -81,9 +93,12 @@ Mono in, mono out. The tape adds 6 ms of latency (the wobble needs room to swing
 Built with the [MOD plugin playbook](https://github.com/Kiwooky/MOD-plugin-playbook). With the playbook checked out next to this repo:
 
 ```sh
-../MOD-plugin-playbook/tools/check.sh --src plugins/nhe-tapestry --bundle bundle/nhe-tapestry.lv2 --test tests/test_nhe_tapestry.py
-# builds native, Duo and Duo X/Dwarf, checks the TTL, runs the tests, writes dist/nhe-tapestry.mk
+bash tools/check.sh            # mono: builds native, Duo and Duo X/Dwarf, checks the TTL, runs the tests, writes dist/nhe-tapestry.mk
+bash tools/check_stereo.sh     # stereo: the same, plus a comparison with the mono build; writes dist/nhe-tapestry-stereo.mk
+python3 tools/gen_ttl.py       # rewrites both bundles' ports, presets and manifests from one table
 ```
+
+Set `PB=` if the playbook lives somewhere else. `RENDER_FACE=1 bash tools/check_stereo.sh` also re-renders the stereo screenshot.
 
 The design, the formats' numbers and what's been measured: [SPEC.md](SPEC.md). What changed: [CHANGELOG.md](CHANGELOG.md).
 
@@ -91,10 +106,13 @@ The design, the formats' numbers and what's been measured: [SPEC.md](SPEC.md). W
 
 | Path | Contents |
 | --- | --- |
-| `plugins/nhe-tapestry/` | DSP source (C++, DPF) |
+| `plugins/nhe-tapestry/` | DSP source (C++, DPF), for both plugins |
+| `plugins/nhe-tapestry-stereo/` | Tapestry Stereo: its header (two inputs, name, URI) and a one-line source that includes the mono one |
 | `bundle/nhe-tapestry.lv2/` | LV2 metadata, factory presets, pedal face (template, CSS, script, images, LCD font) |
-| `tests/` | Audio test suite |
-| `dist/` | The single-file recipe for MOD's builder (generated) |
+| `bundle/nhe-tapestry-stereo.lv2/` | Stereo metadata and presets, plus its own panel, screenshot and thumbnail; the rest of the face is borrowed from the mono bundle at build time |
+| `tests/` | Audio test suites, mono and stereo |
+| `tools/` | Gate scripts and the TTL generator |
+| `dist/` | The single-file recipes for MOD's builder (generated) |
 
 ## Licence
 

@@ -127,3 +127,19 @@ Noise is 1 in the archetype presets (their grain, no hiss) and 0 in Always on; T
 | ALC, quiet player (−34 dBFS peaks) | Pocket lifts it 12 dB more than Walkman |
 | Noise 10 | lands on each format's floor (Walkman −72 dBFS) |
 | CPU, Duo build under qemu | about 1.1× Ouraverb in every format (4-track 1.09×, 8-track 1.13×). Only the Duo's meter gives the real number |
+
+## Tapestry Stereo
+
+Same source (`plugins/nhe-tapestry/TapestryPlugin.cpp`), built with `DISTRHO_PLUGIN_NUM_INPUTS 2` by `plugins/nhe-tapestry-stereo`. Two tracks on one tape:
+
+| Part | Shared or per track | Why |
+| --- | --- | --- |
+| Wow, flutter (read-point movement) | shared | one capstan pulls both tracks |
+| Dropout timing | shared; right depth ±15 % | the whole tape lifts off the head |
+| Auto level (Pocket, Answering), noise reduction (4-track) | linked: detectors hear both (max level; mean power) | a stereo deck's ALC and a linked compander don't let the image lurch |
+| Saturation, self-erasure, grain, hiss, playback EQ, Tone | per track | each track is its own strip of oxide; noise must decorrelate |
+| Head azimuth | right track lags | τ = 40 µs × Age/10 × (1.875 ÷ ips), cap 0.25 ms [guess] |
+
+The left track keeps the mono plugin's noise seed, so with the same source on both inputs it is the mono plugin (bit-identical without -ffast-math; within −65 to −96 dB re the signal as DPF builds it, with -ffast-math). The 4-track only matches while both tracks agree (Age 0, Noise 0): its linked decoder hears the right track's own hiss and azimuth.
+
+Measured (Stereo 1.0.0, in tests): L/R pitch difference ≤ 0.03 cents at Wow and Flutter 200 %; hiss L/R correlation −0.01; azimuth 0.0 / 40.0 µs (cassette, Age 0 / 10), 79.8 µs (Pocket), 2.5 µs (Master); no leak between sides (≤ 7e-14); a left hit ducks the right by 20 dB on Pocket, 0 on Walkman. CPU on the Duo build under qemu: 1.74× the mono plugin (Walkman defaults), 1.96× (4-track, Noise 10).

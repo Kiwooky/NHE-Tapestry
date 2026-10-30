@@ -1,5 +1,20 @@
 # Changelog
 
+## Tapestry Stereo 1.0.0 (build 0): two tracks, one tape
+
+- New plugin, `urn:mod-cookbook:nhe-tapestry-stereo`: the mono source built with two inputs (`plugins/nhe-tapestry-stereo`), Niels's face with a STEREO badge.
+- One transport: wow and flutter shared (L/R pitch difference under 0.03 cents with 4.8 cents of warble). Per track: grain, hiss (L/R correlation −0.01), saturation, EQ.
+- Head azimuth: the right track lags by 40 µs × Age/10 × (1⅞ ips ÷ speed), capped at 0.25 ms: 40 µs at Age 10 on a cassette, 80 on Pocket, 2.5 on Master (measured).
+- Dropouts: same moments on both tracks, the right side's depth within ±15 % (its own generator, so the left stays the mono plugin's).
+- Linked auto level (Pocket, Answering) and noise reduction (4-track): a hit on one side ducks the other (−20 dB on Pocket; 0 on Walkman).
+- No leak between sides (below −140 dB). Left side = the mono plugin when fed the same source: bit-identical without -ffast-math; within −65 to −96 dB with it, as built.
+- Gate: 21 tests pass natively and on the Duo build under qemu. CPU about 1.7× the mono plugin, 2.0× at worst (4-track, Noise 10).
+
+## 1.0.8 (build 8)
+
+- The engine now runs one or two tracks (for Tapestry Stereo). The mono plugin's output is unchanged: sample for sample identical to 1.0.7 across 27 runs (every format, switches mid-note, Age 10, Noise 10).
+- `tools/gen_ttl.py` writes both bundles' TTL, presets and manifests from one table; `tools/check.sh` and `tools/check_stereo.sh` run the gates.
+
 ## 1.0.7 (build 7)
 
 - New panel art with the knob labelled NOISE (Niels). Version bumped so MOD loads the new face.

@@ -4,6 +4,12 @@
 // Archetypes from typical published specs, every number marked [guess] until
 // measured against real machines. Face: Niels's artwork (modgui/).
 //
+// The same source builds Tapestry Stereo (plugins/nhe-tapestry-stereo): DISTRHO_PLUGIN_NUM_INPUTS 2
+// gives two tracks on one transport. Shared: wow and flutter (one capstan), the dropouts' timing,
+// and linked auto level and noise reduction. Per track: saturation, grain, hiss and EQ. Stereo
+// adds head azimuth: the right track lags the left by a few microseconds, more with Age and on
+// slow tape. With one input the build is the mono plugin, sample for sample.
+//
 // Traits (docs/effect-profile.md): [every], [buffer] (a short modulated tape path),
 // nonlinear (tape saturation), level-sensitive (ALC on Pocket and Answering), [mix].
 // No tail and no feedback loop: Tails and the wet limiter were dropped from the template.
@@ -188,6 +194,70 @@ static const float    kCentreMs = 6.0f;
 static const float    kSwingMs  = 5.0f;
 static const float    kRef = 0.1f;              // tape reference level (-20 dBFS rms) for hiss
 static const float    kAlcTarget = 0.25f;
+static const int      kCh = DISTRHO_PLUGIN_NUM_INPUTS;   // 1 = mono, 2 = stereo
+
+#ifndef TAPESTRY_LABEL
+#define TAPESTRY_LABEL        "Tapestry"
+#define TAPESTRY_DESCRIPTION  "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."
+#define TAPESTRY_UNIQUE_ID    d_cconst('n', 'T', 'p', 's')
+#define TAPESTRY_VERSION      d_version(1, 0, 8)   // = lv2:minorVersion 2, microVersion 8
+#endif
+
+// one track on the tape: everything that happens to it alone
+struct Track {
+    float buf[kBufSize], dry[kBufSize];
+    float up[2 * kPhaseTaps], dn[2 * kTaps];
+    int   upPos = 0, dnPos = 0;
+    Shelf1 pre, de, hissDe, tilt;
+    Biquad hp1, hp2, bump, lp1, lp2;
+    Rng   rng { 0x9e3779b9u };                // grain, then hiss, each sample
+    float grLp = 0.0f, grHp = 0.0f, erLp = 0.0f, erEnv = 0.0f;
+
+    inline float saturate(float v)
+    {
+        up[upPos] = up[upPos + kPhaseTaps] = v;
+        const float* h = &up[upPos];   // h[0] is the newest
+        upPos = (upPos + kPhaseTaps - 1) % kPhaseTaps;
+        for (int ph = 0; ph < kOS; ++ph) {
+            float xo = 0.0f;
+            for (int k = 0; k < kPhaseTaps; ++k) xo += kFir[k * kOS + ph] * h[k];
+            dn[dnPos] = dn[dnPos + kTaps] = softClip(xo * (float)kOS);
+            dnPos = (dnPos + kTaps - 1) % kTaps;
+        }
+        const float* q = &dn[dnPos + 1];
+        float yd = 0.0f;
+        for (int j = 0; j < kTaps; ++j) yd += kFir[j] * q[j];
+        return yd;
+    }
+    inline float read(uint32_t w, float d) const
+    {
+        const float rp = (float)w - d + (float)kBufSize;
+        const uint32_t ip = (uint32_t)rp;
+        const float t = rp - (float)ip;
+        const float xm1 = buf[(ip - 1) & kBufMask], x0 = buf[ip & kBufMask];
+        const float x1  = buf[(ip + 1) & kBufMask], x2 = buf[(ip + 2) & kBufMask];
+        const float c1 = 0.5f * (x1 - xm1);
+        const float c2 = xm1 - 2.5f * x0 + 2.0f * x1 - 0.5f * x2;
+        const float c3 = 0.5f * (x2 - xm1) + 1.5f * (x0 - x1);
+        return ((c3 * t + c2) * t + c1) * t + x0;
+    }
+    void clearFilters()
+    {
+        pre.clear(); de.clear(); hissDe.clear();
+        hp1.clear(); hp2.clear(); bump.clear(); lp1.clear(); lp2.clear();
+        erLp = erEnv = 0.0f; tilt.clear();
+    }
+    void reset(uint32_t seed)
+    {
+        std::memset(buf, 0, sizeof(buf)); std::memset(dry, 0, sizeof(dry));
+        std::memset(up, 0, sizeof(up)); std::memset(dn, 0, sizeof(dn));
+        upPos = dnPos = 0;
+        clearFilters();
+        grLp = grHp = 0.0f;
+        rng.s = seed;
+    }
+};
+static const uint32_t kSeeds[2] = { 0x9e3779b9u, 0x7f4a7c15u };   // the left track keeps the mono seed
 
 class TapestryPlugin : public Plugin
 {
@@ -211,12 +281,12 @@ public:
     }
 
 protected:
-    const char* getLabel()       const override { return "Tapestry"; }
-    const char* getDescription() const override { return "Tape machines from studio reel to answering machine: wow, flutter, saturation and tape's low end."; }
+    const char* getLabel()       const override { return TAPESTRY_LABEL; }
+    const char* getDescription() const override { return TAPESTRY_DESCRIPTION; }
     const char* getMaker()       const override { return DISTRHO_PLUGIN_BRAND; }
     const char* getLicense()     const override { return "GPL-3.0-or-later"; }
-    uint32_t    getVersion()     const override { return d_version(1, 0, 7); }   // = lv2:minorVersion 2, microVersion 7
-    int64_t     getUniqueId()    const override { return d_cconst('n', 'T', 'p', 's'); }
+    uint32_t    getVersion()     const override { return TAPESTRY_VERSION; }
+    int64_t     getUniqueId()    const override { return TAPESTRY_UNIQUE_ID; }
 
     void initParameter(uint32_t index, Parameter& p) override
     {
@@ -327,9 +397,6 @@ protected:
 
     void run(const float** inputs, float** outputs, uint32_t frames) override
     {
-        const float* in = inputs[0];
-        float* out = outputs[0];
-
         const int   fmtT   = (int)clampf(fParams[kFormat] + 0.5f, 0.0f, (float)(kNumFormats - 1));
         const int   tapeT  = (int)clampf(fParams[kTape] + 0.5f, 0.0f, (float)(kNumTapes - 1));
         const bool  bypass = fParams[kBypass] > 0.5f;
@@ -355,6 +422,7 @@ protected:
             fDrive = driveT; fDriveOut = driveOutT;
             fLev = levT;
             fToneSm = tone; setTilt(tone);
+            fAzimA = fAzimB = fAzimT;
             computeMod(wowK, flutK, age);  // two steps, so the first block's glide is real
             fDispA = fDispB;
             computeMod(wowK, flutK, age);
@@ -386,6 +454,10 @@ protected:
                 computeMod(wowK, flutK, age);
                 stepDropouts(age);
                 fAlcGainT = fAlcOn ? std::fmin(fAlcMax, kAlcTarget / (fAlcEnv + 1e-4f)) : 1.0f;
+                if (kCh > 1) {                       // azimuth glides with Age
+                    fAzimA = fAzimB;
+                    fAzimB = fAzimT;
+                }
                 if (fNcOn) {
                     // 2:1 encode from the input's power, 1:2 decode from the tape's playback power.
                     // The tape's EQ, saturation and wow sit in between, so they never quite agree:
@@ -406,73 +478,81 @@ protected:
             fSw    += fSwCoef * (fSwT - fSw);
             fAlcGain += fAlcGainC * (fAlcGainT - fAlcGain);
 
-            const float x = in[i];
+            // read every input before writing any output: the host may hand the same buffers
+            float x[kCh];
+            for (int c = 0; c < kCh; ++c) x[c] = inputs[c][i];
 
-            // ---- record side
-            float v = x;
+            // ---- record side: auto level and the noise reduction see both tracks (linked)
+            float v[kCh];
+            for (int c = 0; c < kCh; ++c) v[c] = x[c];
             if (fAlcOn) {
-                const float a = std::fabs(v);
+                float a = std::fabs(v[0]);
+                for (int c = 1; c < kCh; ++c) a = std::fmax(a, std::fabs(v[c]));
                 fAlcEnv += (a > fAlcEnv ? fAlcAtk : fAlcRel) * (a - fAlcEnv) + 1e-18f;
-                v *= fAlcGain;
+                for (int c = 0; c < kCh; ++c) v[c] *= fAlcGain;
             }
             if (fNcOn) {                         // noise reduction encode (2:1)
-                const float pw = v * v;
+                float pw = v[0] * v[0];
+                for (int c = 1; c < kCh; ++c) pw += v[c] * v[c];
+                pw *= 1.0f / (float)kCh;
                 fNcPin += (pw > fNcPin ? fNcAtk : fNcRel) * (pw - fNcPin) + 1e-18f;
-                v *= fNcCA + frac * (fNcCB - fNcCA);
+                const float gc = fNcCA + frac * (fNcCB - fNcCA);
+                for (int c = 0; c < kCh; ++c) v[c] *= gc;
             }
             const float g = fG0 * fDrive;
-            v = fPre.process(v * g);
-            // self-erasure: hot treble partly wipes itself off the oxide, so the pick's
-            // edge is smoothed before the body clips. Knee 0.5 of tape full scale [guess]
-            fErLp += fEraseSplit * (v - fErLp);
-            const float hi = v - fErLp;
-            const float ah = std::fabs(hi);
-            fErEnv += (ah > fErEnv ? fEraseAtk : fEraseRel) * (ah - fErEnv) + 1e-18f;
-            v = fErLp + hi / (1.0f + 2.0f * fErEnv);
-            v = saturate(v);
-            v = fDe.process(v) / g * fDriveOut;
+            const float d = fCentre + fDispA + frac * (fDispB - fDispA);   // one transport
+            float y[kCh];
+            for (int c = 0; c < kCh; ++c) {
+                Track& T = fTr[c];
+                float u = T.pre.process(v[c] * g);
+                // self-erasure: hot treble partly wipes itself off the oxide, so the pick's
+                // edge is smoothed before the body clips. Knee 0.5 of tape full scale [guess]
+                T.erLp += fEraseSplit * (u - T.erLp);
+                const float hi = u - T.erLp;
+                const float ah = std::fabs(hi);
+                T.erEnv += (ah > T.erEnv ? fEraseAtk : fEraseRel) * (ah - T.erEnv) + 1e-18f;
+                u = T.erLp + hi / (1.0f + 2.0f * T.erEnv);
+                u = T.saturate(u);
+                u = T.de.process(u) / g * fDriveOut;
 
-            // grain: the oxide isn't even, so the level shimmers with the signal
-            const float n = fRng.next();
-            fGrLpS += fGrainLp * (n - fGrLpS);
-            fGrHpS += fGrainHp * (fGrLpS - fGrHpS);
-            v *= 1.0f + fGrainAmt * (fGrLpS - fGrHpS);
+                // grain: the oxide isn't even, so the level shimmers with the signal
+                const float n = T.rng.next();
+                T.grLp += fGrainLp * (n - T.grLp);
+                T.grHp += fGrainHp * (T.grLp - T.grHp);
+                u *= 1.0f + fGrainAmt * (T.grLp - T.grHp);
 
-            fBuf[fW] = v;
-            fDry[fW] = x;
+                T.buf[fW] = u;
+                T.dry[fW] = x[c];
 
-            // ---- tape path: read point swings around the centre
-            const float d = fCentre + fDispA + frac * (fDispB - fDispA);
-            const float rp = (float)fW - d + (float)kBufSize;
-            const uint32_t ip = (uint32_t)rp;
-            const float t = rp - (float)ip;
-            const float xm1 = fBuf[(ip - 1) & kBufMask], x0 = fBuf[ip & kBufMask];
-            const float x1  = fBuf[(ip + 1) & kBufMask], x2 = fBuf[(ip + 2) & kBufMask];
-            const float c1 = 0.5f * (x1 - xm1);
-            const float c2 = xm1 - 2.5f * x0 + 2.0f * x1 - 0.5f * x2;
-            const float c3 = 0.5f * (x2 - xm1) + 1.5f * (x0 - x1);
-            float y = ((c3 * t + c2) * t + c1) * t + x0;
+                // ---- tape path: read point swings around the centre; the right track sits
+                // a little behind the left when the head's azimuth is off
+                y[c] = T.read(fW, c == 0 ? d : d + fAzimA + frac * (fAzimB - fAzimA));
 
-            // ---- playback side
-            if (fHissAmp > 0.0f) y += fHissDe.process(fHissAmp * fRng.next());
-            y *= 1.0f - fDropEnv * fDropDepth;
-            y = fHp1.process(y); y = fHp2.process(y);
-            y = fBump.process(y);
-            y = fLp1.process(y); y = fLp2.process(y);
-            if (fNcOn) {                         // noise reduction decode (1:2)
-                const float pw = y * y;
-                fNcPout += (pw > fNcPout ? fNcAtk : fNcRel) * (pw - fNcPout) + 1e-18f;
-                y *= fNcEA + frac * (fNcEB - fNcEA);
+                // ---- playback side
+                if (fHissAmp > 0.0f) y[c] += T.hissDe.process(fHissAmp * T.rng.next());
+                y[c] *= 1.0f - fDropEnv * (c == 0 ? fDropDepth : fDropDepthR);
+                y[c] = T.hp1.process(y[c]); y[c] = T.hp2.process(y[c]);
+                y[c] = T.bump.process(y[c]);
+                y[c] = T.lp1.process(y[c]); y[c] = T.lp2.process(y[c]);
             }
-            y *= fMakeup * fSw;
-            // Tone: a first-order tilt, unity at 800 Hz
-            y = fTiltGain * fTilt.process(y);
-
-            const float dry = fDry[(fW - fDryDelay) & kBufMask];
+            if (fNcOn) {                         // noise reduction decode (1:2), linked
+                float pw = y[0] * y[0];
+                for (int c = 1; c < kCh; ++c) pw += y[c] * y[c];
+                pw *= 1.0f / (float)kCh;
+                fNcPout += (pw > fNcPout ? fNcAtk : fNcRel) * (pw - fNcPout) + 1e-18f;
+                const float ge = fNcEA + frac * (fNcEB - fNcEA);
+                for (int c = 0; c < kCh; ++c) y[c] *= ge;
+            }
+            const uint32_t rd = (fW - fDryDelay) & kBufMask;
+            for (int c = 0; c < kCh; ++c) {
+                Track& T = fTr[c];
+                float o = y[c] * (fMakeup * fSw);
+                // Tone: a first-order tilt, unity at 800 Hz
+                o = fTiltGain * T.tilt.process(o);
+                const float active = fLev * (fMix * o + (1.0f - fMix) * T.dry[rd]);
+                outputs[c][i] = fAct * active + (1.0f - fAct) * x[c];
+            }
             fW = (fW + 1) & kBufMask;
-
-            const float active = fLev * (fMix * y + (1.0f - fMix) * dry);
-            out[i] = fAct * active + (1.0f - fAct) * x;
         }
     }
 
@@ -492,23 +572,6 @@ private:
         return v1;
     }
 
-    inline float saturate(float v)
-    {
-        fUp[fUpPos] = fUp[fUpPos + kPhaseTaps] = v;
-        const float* h = &fUp[fUpPos];   // h[0] is the newest
-        fUpPos = (fUpPos + kPhaseTaps - 1) % kPhaseTaps;
-        for (int ph = 0; ph < kOS; ++ph) {
-            float xo = 0.0f;
-            for (int k = 0; k < kPhaseTaps; ++k) xo += kFir[k * kOS + ph] * h[k];
-            fDn[fDnPos] = fDn[fDnPos + kTaps] = softClip(xo * (float)kOS);
-            fDnPos = (fDnPos + kTaps - 1) % kTaps;
-        }
-        const float* q = &fDn[fDnPos + 1];
-        float yd = 0.0f;
-        for (int j = 0; j < kTaps; ++j) yd += kFir[j] * q[j];
-        return yd;
-    }
-
     void applyFormat(int fmt, int tape, float age)
     {
         const bool alcChanged = (kFormats[fmt].alcMaxDb > 0.0f) != (kFormats[fFmt].alcMaxDb > 0.0f);
@@ -516,9 +579,11 @@ private:
         const FormatDef& F = kFormats[fmt];
         const TapeDef& T = kTapes[tape];
         const double ez = F.emphHz, ep = F.emphHz * std::pow(10.0, (F.emphDb + T.emphOffDb) / 20.0);
-        fPre.set(ez, ep, fSr);       // pre: zero at ez, pole at ep (treble lift)
-        fDe.set(ep, ez, fSr);        // de: the exact inverse
-        fHissDe.set(ep, ez, fSr);    // hiss gets de-emphasised like it does on tape
+        for (int c = 0; c < kCh; ++c) {
+            fTr[c].pre.set(ez, ep, fSr);       // pre: zero at ez, pole at ep (treble lift)
+            fTr[c].de.set(ep, ez, fSr);        // de: the exact inverse
+            fTr[c].hissDe.set(ep, ez, fSr);    // hiss gets de-emphasised like it does on tape
+        }
         setResponse(fmt, tape, age);
         // self-erasure corner: 2.5 kHz at cassette speed, rising with sqrt(speed) [guess: physics says
         // linear in speed, but sqrt keeps some treble-first squash on the fast reels]
@@ -546,6 +611,10 @@ private:
         fAlcMax = fAlcOn ? dbToLin(F.alcMaxDb) : 1.0f;
         fMakeup = dbToLin(F.makeupDb);
         fNcOn = F.nc > 0.5f;
+        // azimuth (stereo): a worn, misaligned head reads the right track a few microseconds late.
+        // The offset on the tape is fixed, so slow tape turns it into more time: 40 us at Age 10 on
+        // a cassette, a few us on the fast reels, capped at 0.25 ms [guess]
+        fAzimT = kCh > 1 ? std::fmin(age * 0.1f * 40e-6f * (1.875f / F.ips), 0.25e-3f) * fSr : 0.0f;
     }
 
     void setResponse(int fmt, int tape, float age)
@@ -555,14 +624,17 @@ private:
         const double nyq = 0.45 * fSr;
         // 4th order (two stages) uses Butterworth Qs; 2nd order uses 0.707
         const double qa = F.hpStages > 1 ? 0.5412 : 0.7071, qb = 1.3066;
-        fHp1.highpass(F.hpHz, qa, fSr);
-        if (F.hpStages > 1) fHp2.highpass(F.hpHz, qb, fSr); else fHp2.identity();
-        fBump.peak(F.bumpHz, F.bumpDb, 1.0, fSr);
         // head wear and oxide shed: Age dulls the top end, corner down to 45 % at 10 [guess]
         const double lp = std::fmin(nyq, F.lpHz * T.lpMul / (1.0 + 0.12 * age));
         const double la = F.lpStages > 1 ? 0.5412 : 0.7071;
-        fLp1.lowpass(lp, la, fSr);
-        if (F.lpStages > 1) fLp2.lowpass(lp, qb, fSr); else fLp2.identity();
+        for (int c = 0; c < kCh; ++c) {
+            Track& K = fTr[c];
+            K.hp1.highpass(F.hpHz, qa, fSr);
+            if (F.hpStages > 1) K.hp2.highpass(F.hpHz, qb, fSr); else K.hp2.identity();
+            K.bump.peak(F.bumpHz, F.bumpDb, 1.0, fSr);
+            K.lp1.lowpass(lp, la, fSr);
+            if (F.lpStages > 1) K.lp2.lowpass(lp, qb, fSr); else K.lp2.identity();
+        }
         fAgeApplied = age;
     }
 
@@ -608,6 +680,9 @@ private:
         if (u < rate / fCr) {
             fDropDepth = 0.3f + 0.3f * (0.5f * (fRngMod.next() + 1.0f));     // -3 .. -8 dB
             fDropHold = (int)((0.015f + 0.06f * 0.5f * (fRngMod.next() + 1.0f)) * fCr);
+            // stereo: the whole tape lifts, so both tracks dip together, the right a little
+            // more or less (own generator, so the left stays the mono plugin's)
+            fDropDepthR = kCh > 1 ? fDropDepth * (1.0f + 0.3f * fRngSkew.next()) : fDropDepth;
         }
     }
 
@@ -617,7 +692,7 @@ private:
     void setTilt(float tone)
     {
         const double A = std::pow(10.0, 0.8 * tone / 20.0);
-        fTilt.set(800.0 / A, 800.0 * A, fSr);
+        for (int c = 0; c < kCh; ++c) fTr[c].tilt.set(800.0 / A, 800.0 * A, fSr);
         fTiltGain = (float)(1.0 / A);
     }
 
@@ -629,45 +704,34 @@ private:
 
     void clearFilters()
     {
-        fPre.clear(); fDe.clear(); fHissDe.clear();
-        fHp1.clear(); fHp2.clear(); fBump.clear(); fLp1.clear(); fLp2.clear();
-        fErLp = fErEnv = 0.0f; fTilt.clear();
+        for (int c = 0; c < kCh; ++c) fTr[c].clearFilters();
     }
 
     void reset()
     {
-        std::memset(fBuf, 0, sizeof(fBuf));
-        std::memset(fDry, 0, sizeof(fDry));
-        std::memset(fUp, 0, sizeof(fUp));
-        std::memset(fDn, 0, sizeof(fDn));
-        fUpPos = 0; fDnPos = 0; fW = 0; fCrCount = 0;
-        fPre.clear(); fDe.clear(); fHissDe.clear();
-        fHp1.clear(); fHp2.clear(); fBump.clear(); fLp1.clear(); fLp2.clear();
-        fGrLpS = fGrHpS = 0.0f;
-        fErLp = fErEnv = 0.0f; fTilt.clear();
+        for (int c = 0; c < kCh; ++c) fTr[c].reset(kSeeds[c]);
+        fW = 0; fCrCount = 0;
         fPhS = 0.0f; fPhC = 0.37f; fR1 = fR2 = fF1 = fF2 = 0.0f;
         fDispA = fDispB = 0.0f;
-        fDropEnv = 0.0f; fDropDepth = 0.0f; fDropHold = 0; fSwHold = 0;
+        fDropEnv = 0.0f; fDropDepth = fDropDepthR = 0.0f; fDropHold = 0; fSwHold = 0;
+        fAzimA = fAzimB = fAzimT = 0.0f;
         fAlcEnv = kAlcTarget; fAlcGain = fAlcGainT = 1.0f;
         resetNc();
-        fRng.s = 0x9e3779b9u; fRngMod.s = 0x2545F491u;
+        fRngMod.s = 0x2545F491u; fRngSkew.s = 0x6c8e9cf5u;
     }
 
     float fParams[kParameterCount];
-    float fBuf[kBufSize], fDry[kBufSize];
-    float fUp[2 * kPhaseTaps], fDn[2 * kTaps];
-    int   fUpPos = 0, fDnPos = 0, fCrCount = 0;
+    Track fTr[kCh];
+    int   fCrCount = 0;
     uint32_t fW = 0, fDryDelay = 288;
-
-    Shelf1 fPre, fDe, fHissDe;
-    Biquad fHp1, fHp2, fBump, fLp1, fLp2;
-    Rng    fRng { 0x9e3779b9u }, fRngMod { 0x2545F491u };
+    Rng   fRngMod { 0x2545F491u }, fRngSkew { 0x6c8e9cf5u };
+    float fAzimA = 0.0f, fAzimB = 0.0f, fAzimT = 0.0f, fDropDepthR = 0.0f;
 
     int   fFmt = kWalkman, fTape = kFerric;
     float fAgeApplied = -1.0f;
     float fSr = 48000.0f, fCr = 3000.0f, fSmooth = 0.0f, fSwCoef = 0.0f;
     float fAlcAtk = 0.0f, fAlcRel = 0.0f, fAlcGainC = 0.0f, fAlcEnv = kAlcTarget, fAlcGain = 1.0f, fAlcGainT = 1.0f;
-    float fGrainHp = 0.0f, fGrainLp = 0.5f, fGrainNorm = 1.0f, fGrLpS = 0.0f, fGrHpS = 0.0f;
+    float fGrainHp = 0.0f, fGrainLp = 0.5f, fGrainNorm = 1.0f;
     float fCentre = 288.0f, fSwing = 240.0f;
     float fPhS = 0.0f, fPhC = 0.0f, fR1 = 0.0f, fR2 = 0.0f, fF1 = 0.0f, fF2 = 0.0f;
     float fRandNorm[kNumFormats], fFlutNorm[kNumFormats];
@@ -677,11 +741,10 @@ private:
     float fG0 = 3.0f, fHissAmp = 0.0f, fGrainAmt = 0.0f, fAlcMax = 1.0f, fMakeup = 1.0f;
     bool  fAlcOn = false;
     float fRandA = 0.001f, fSvfG = 0.01f, fSvfK = 0.667f;
-    float fEraseSplit = 0.3f, fEraseAtk = 0.04f, fEraseRel = 0.0005f, fErLp = 0.0f, fErEnv = 0.0f;
+    float fEraseSplit = 0.3f, fEraseAtk = 0.04f, fEraseRel = 0.0005f;
     bool  fNcOn = false;
     float fNcAtk = 0.01f, fNcRel = 0.0003f, fNcPin = 0.01f, fNcPout = 0.01f;
     float fNcCA = 1.0f, fNcCB = 1.0f, fNcEA = 1.0f, fNcEB = 1.0f;
-    Shelf1 fTilt;
     float fTiltGain = 1.0f, fToneSm = 0.0f, fLev = 1.0f, fDriveOut = 1.0f;
     float fMix = 1.0f, fAct = 1.0f, fDrive = 1.0f, fSw = 1.0f, fSwT = 1.0f;
     bool  fFirst = true;
