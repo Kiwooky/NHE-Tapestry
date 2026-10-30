@@ -2,7 +2,7 @@
 # connected over USB. Assembled by tools/assemble_recipe.py (MOD plugin playbook).
 
 
-NHE_TAPESTRY_STEREO_VERSION = f2b0d92d0946950bd237d8bc99eea73ef656fbe7
+NHE_TAPESTRY_STEREO_VERSION = 61d38eb638449647fb8395a35c5b8dab7e981ba7
 NHE_TAPESTRY_STEREO_SITE = https://github.com/DISTRHO/DPF.git
 NHE_TAPESTRY_STEREO_SITE_METHOD = git
 NHE_TAPESTRY_STEREO_BUNDLES = nhe-tapestry-stereo.lv2
