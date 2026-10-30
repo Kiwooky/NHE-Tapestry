@@ -14,7 +14,7 @@
 ######################################
 
 # <- the full 40-character commit hash of NHE-Tapestry to build
-NHE_TAPESTRY_VERSION = 0000000000000000000000000000000000000000
+NHE_TAPESTRY_VERSION = d1779d1605d9747e1c0a9c184b7fce249d545c44
 NHE_TAPESTRY_SITE = https://github.com/Kiwooky/NHE-Tapestry.git
 NHE_TAPESTRY_SITE_METHOD = git
 NHE_TAPESTRY_GIT_SUBMODULES = y
