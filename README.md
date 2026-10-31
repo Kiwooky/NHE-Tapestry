@@ -127,6 +127,6 @@ The design, the formats' numbers and what's been measured: [SPEC.md](SPEC.md). W
 
 ## Licence
 
-Code: GPL-3.0-or-later. Artwork: © New Horizon Electronics ([ARTWORK-LICENSE.md](ARTWORK-LICENSE.md)).
+Code: GPL-3.0-or-later ([LICENSE](LICENSE)). Artwork: © New Horizon Electronics ([ARTWORK-LICENSE.md](ARTWORK-LICENSE.md)).
 
 The LCD font is "lcd phone" by Raúl Pérez Canseco (Grafito Design, dibujosenlinea.com.mx), with minus, plus and full stop glyphs added and the character set cut down for the LCDs.
